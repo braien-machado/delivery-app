@@ -193,11 +193,11 @@ describe('Test GET /seller/orders endpoint', () => {
   });
 });
 
-describe('Test PATCH order routes', () => {
+describe('Test PATCH seller/orders/start/:id', () => {
   let res;
-  let token;
-  describe('Test seller/orders/start/:id', () => {
-    it('Send an invalid token', async () => {
+
+  describe('with invalid token', () => {
+    it('expect status 401 and message \'Invalid token\'', async () => {
       res = await chai.request(app).patch('/seller/orders/start/2');
       expect(res.status).to.be.equal(401);
       expect(res.body).to.be.an('object').to.have.own.property('message');
@@ -205,76 +205,82 @@ describe('Test PATCH order routes', () => {
     });
   });
 
-  describe('Update status sale property at start route', () => {
-    before(async () => { sinon.stub(Sale, 'update').resolves(1); });
-    after(() => { (Sale.update).restore() });
+  describe('with valid token', () => {
+    let token;
 
-    it('Should return http status 204', async () => {
+    beforeEach(async () => {
       const { body } = await chai.request(app).post('/login')
         .send(validSeller);
       token = body.token;
-      res = await chai.request(app).patch('/seller/orders/start/2')
-        .set({ authorization: token });
-      expect(res.status).to.be.equal(204);
+    });
+
+    describe('Update status sale property at start route', () => {
+      before(async () => { sinon.stub(Sale, 'update').resolves(1); });
+      after(() => { (Sale.update).restore() });
+  
+      it('Should return http status 204', async () => {
+        res = await chai.request(app).patch('/seller/orders/start/2')
+          .set({ authorization: token });
+        expect(res.status).to.be.equal(204);
+      });
+    });
+  
+    describe('Does not update status sale property at start route', () => {
+      before(async () => { sinon.stub(Sale, 'update').resolves(0); });
+      after(() => { (Sale.update).restore() });
+  
+      it('Should return http status 404', async () => {
+        res = await chai.request(app).patch('/seller/orders/start/2')
+          .set({ authorization: token });
+        expect(res.status).to.be.equal(404);
+        expect(res.body).to.be.an('object').to.have.own.property('message');
+        expect(res.body.message).to.be.equal('Order not found');
+      });
+    });
+  
+    describe('Test database exception at start route', () => {
+      before(async () => {
+        sinon.stub(Sale, 'update').throws();
+      });
+  
+      after(() => { (Sale.update).restore(); });
+  
+      it('Should return http status 500', async () => {
+        res = await chai.request(app).patch('/seller/orders/start/2')
+          .set({ authorization: token });
+        expect(res.status).to.be.equal(500);
+        expect(res.body).to.have.own.property('message')
+      });
     });
   });
+});
 
-  describe('Does not update status sale property at start route', () => {
-    before(async () => { sinon.stub(Sale, 'update').resolves(0); });
-    after(() => { (Sale.update).restore() });
+describe('Test PATCH seller/orders/leave/:id', () => {
+  let res;
+  let token;
 
-    it('Should return http status 404', async () => {
-      const { body } = await chai.request(app).post('/login')
-        .send(validSeller);
-      token = body.token;
-      res = await chai.request(app).patch('/seller/orders/start/2')
-        .set({ authorization: token });
-      expect(res.status).to.be.equal(404);
-      expect(res.body).to.be.an('object').to.have.own.property('message');
-      expect(res.body.message).to.be.equal('Order not found');
-    });
-  });
-
-  describe('Test database exception at start route', () => {
-    before(async () => {
-      sinon.stub(Sale, 'update').throws();
-    });
-
-    after(() => { (Sale.update).restore(); });
-
-    it('Should return http status 500', async () => {
-      const { body } = await chai.request(app).post('/login')
-        .send(validSeller);
-      token = body.token;
-      res = await chai.request(app).patch('/seller/orders/start/2')
-        .set({ authorization: token });
-      expect(res.status).to.be.equal(500);
-      expect(res.body).to.have.own.property('message')
-    });
+  beforeEach(async () => {
+    const { body } = await chai.request(app).post('/login')
+      .send(validSeller);
+    token = body.token;
   });
 
   describe('Update status sale property at /seller/orders/leave/:id route', () => {
     before(async () => { sinon.stub(Sale, 'update').resolves(1); });
     after(() => { (Sale.update).restore() });
-
+  
     it('Should return http status 204', async () => {
-      const { body } = await chai.request(app).post('/login')
-        .send(validSeller);
-      token = body.token;
       res = await chai.request(app).patch('/seller/orders/leave/2')
         .set({ authorization: token });
       expect(res.status).to.be.equal(204);
     });
   });
-
+  
   describe('Does not update status sale property at leave route', () => {
     before(async () => { sinon.stub(Sale, 'update').resolves(0); });
     after(() => { (Sale.update).restore() });
-
+  
     it('Should return http status 404', async () => {
-      const { body } = await chai.request(app).post('/login')
-        .send(validSeller);
-      token = body.token;
       res = await chai.request(app).patch('/seller/orders/leave/2')
         .set({ authorization: token });
       expect(res.status).to.be.equal(404);
@@ -282,23 +288,31 @@ describe('Test PATCH order routes', () => {
       expect(res.body.message).to.be.equal('Order not found');
     });
   });
-
+  
   describe('Test database exception at leave route', () => {
     before(async () => {
       sinon.stub(Sale, 'update').throws();
     });
-
+  
     after(() => { (Sale.update).restore(); });
-
+  
     it('Should return http status 500', async () => {
-      const { body } = await chai.request(app).post('/login')
-        .send(validSeller);
-      token = body.token;
       res = await chai.request(app).patch('/seller/orders/leave/2')
         .set({ authorization: token });
       expect(res.status).to.be.equal(500);
       expect(res.body).to.have.own.property('message')
     });
+  });
+});
+
+describe('Test PATCH seller/orders/leave/:id', () => {
+  let res;
+  let token;
+
+  beforeEach(async () => {
+    const { body } = await chai.request(app).post('/login')
+      .send(validSeller);
+    token = body.token;
   });
 
   describe('Update status sale property at /seller/orders/delivered/:id route', () => {
@@ -306,9 +320,6 @@ describe('Test PATCH order routes', () => {
     after(() => { (Sale.update).restore() });
 
     it('Should return http status 204', async () => {
-      const { body } = await chai.request(app).post('/login')
-        .send(validSeller);
-      token = body.token;
       res = await chai.request(app).patch('/seller/orders/delivered/2')
         .set({ authorization: token });
       expect(res.status).to.be.equal(204);
@@ -320,9 +331,6 @@ describe('Test PATCH order routes', () => {
     after(() => { (Sale.update).restore() });
 
     it('Should return http status 404', async () => {
-      const { body } = await chai.request(app).post('/login')
-        .send(validSeller);
-      token = body.token;
       res = await chai.request(app).patch('/seller/orders/delivered/2')
         .set({ authorization: token });
       expect(res.status).to.be.equal(404);
@@ -339,9 +347,6 @@ describe('Test PATCH order routes', () => {
     after(() => { (Sale.update).restore(); });
 
     it('Should return http status 500', async () => {
-      const { body } = await chai.request(app).post('/login')
-        .send(validSeller);
-      token = body.token;
       res = await chai.request(app).patch('/seller/orders/delivered/2')
         .set({ authorization: token });
       expect(res.status).to.be.equal(500);
