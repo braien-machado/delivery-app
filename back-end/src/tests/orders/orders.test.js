@@ -7,9 +7,7 @@ const app = require('../../api/app');
 const { validUser, validSeller } = require('../users/mocks/loginMocks');
 const {
   orders,
-  userToken,
   userOrderById,
-  sellerToken,
   sellerOrderById,
   userIdConflictOrder,
 } = require('./mocks/ordersMock');
@@ -20,54 +18,62 @@ const { expect } = chai;
 
 describe('Test GET /customer/orders endpoint', () => {
   let res;
-  describe('List all orders from an user', () => {
-    before(async () => {
-      sinon.stub(User, 'findOne').resolves(userDbResponse);
-      sinon.stub(Sale, 'findAll').resolves(orders);
-    });
-    after(() => {
-      (User.findOne).restore();
-      (Sale.findAll).restore();
-    });
+  let token;
 
-    it('Should http status 200 and an array', async () => {
-      const { body: { token } } = await chai.request(app).post('/login')
+  describe('with user token', () => {
+    beforeEach(async () => {
+      const { body } = await chai.request(app).post('/login')
         .send(validUser);
-      res = await chai.request(app)
-        .get('/customer/orders').set({ authorization: token });
-      expect(res.status).to.be.equal(200);
-      expect(res.body).to.be.an('array').to.have.length(3);
-      expect(res.body[0]).to.include.all.keys([
-        'id',
-        'totalPrice',
-        'deliveryAddress',
-        'deliveryNumber',
-        'saleDate',
-        'status',
-        'userId',
-        'sellerId',
-      ]);
-    });
-  });
-
-  describe('List a specific order using the id param', () => {
-    before(async () => {
+      token = body.token;
+  
       sinon.stub(User, 'findOne').resolves(userDbResponse);
-      sinon.stub(Sale, 'findOne').resolves(userOrderById);
     });
-
-    after(() => {
-      (User.findOne).restore();
-      (Sale.findOne).restore();
+  
+    afterEach(() => {
+      User.findOne.restore();
     });
-
-    it('Should return hhtp status 200 and an object', async () => {
-      const { body: { token } } = await chai.request(app).post('/login')
-        .send(validUser);
-      res = await chai.request(app).get('/customer/orders/1')
-        .set({ authorization: token });
-      expect(res.status).to.be.equal(200);
-      expect(res.body).to.be.an('object').to.have.own.property('status');
+  
+    describe('List all orders from an user', () => {
+      before(async () => {
+        sinon.stub(Sale, 'findAll').resolves(orders);
+      });
+      after(() => {
+        (Sale.findAll).restore();
+      });
+  
+      it('Should http status 200 and an array', async () => {
+        res = await chai.request(app)
+          .get('/customer/orders').set({ authorization: token });
+        expect(res.status).to.be.equal(200);
+        expect(res.body).to.be.an('array').to.have.length(3);
+        expect(res.body[0]).to.include.all.keys([
+          'id',
+          'totalPrice',
+          'deliveryAddress',
+          'deliveryNumber',
+          'saleDate',
+          'status',
+          'userId',
+          'sellerId',
+        ]);
+      });
+    });
+  
+    describe('List a specific order using the id param', () => {
+      before(async () => {
+        sinon.stub(Sale, 'findOne').resolves(userOrderById);
+      });
+  
+      after(() => {
+        (Sale.findOne).restore();
+      });
+  
+      it('Should return hhtp status 200 and an object', async () => {
+        res = await chai.request(app).get('/customer/orders/1')
+          .set({ authorization: token });
+        expect(res.status).to.be.equal(200);
+        expect(res.body).to.be.an('object').to.have.own.property('status');
+      });
     });
   });
 
@@ -83,8 +89,9 @@ describe('Test GET /customer/orders endpoint', () => {
     });
 
     it('Should return http status 403', async () => {
-      const { body: { token } } = await chai.request(app).post('/login')
+      const { body } = await chai.request(app).post('/login')
         .send(validSeller);
+      token = body.token;
 
       res = await chai.request(app).get('/customer/orders/1').set({ authorization: token });
       expect(res.status).to.be.equal(403);
@@ -97,100 +104,105 @@ describe('Test GET /customer/orders endpoint', () => {
 describe('Test GET /seller/orders endpoint', () => {
   let res;
   let token;
-  describe('List all orders from a seller', () => {
-    before(async () => {
-      sinon.stub(User, 'findOne').resolves(sellerDbResponse);
-      sinon.stub(Sale, 'findAll').resolves(orders);
 
+  describe('with seller token', () => {
+    beforeEach(async () => {
       const { body } = await chai.request(app).post('/login')
         .send(validSeller);
       token = body.token;
     });
-
-    after(() => {
-      (User.findOne).restore();
-      (Sale.findAll).restore();
+  
+    describe('List all orders from a seller', () => {
+      before(async () => {
+        sinon.stub(User, 'findOne').resolves(sellerDbResponse);
+        sinon.stub(Sale, 'findAll').resolves(orders);
+      });
+  
+      after(() => {
+        (User.findOne).restore();
+        (Sale.findAll).restore();
+      });
+  
+      it('Should return http status 200 and an array', async () => {
+        res = await chai.request(app).get('/seller/orders')
+          .set({ authorization: token });
+        expect(res.status).to.be.equal(200);
+        expect(res.body).to.be.an('array').to.have.length(3);
+        expect(res.body[0]).to.all.keys([
+          'id',
+          'totalPrice',
+          'deliveryAddress',
+          'deliveryNumber',
+          'saleDate',
+          'status',
+          'userId',
+          'sellerId',
+        ]);
+      });
     });
-
-    it('Should return http status 200 and an array', async () => {
-      res = await chai.request(app).get('/seller/orders')
-        .set({ authorization: token });
-      expect(res.status).to.be.equal(200);
-      expect(res.body).to.be.an('array').to.have.length(3);
-      expect(res.body[0]).to.all.keys([
-        'id',
-        'totalPrice',
-        'deliveryAddress',
-        'deliveryNumber',
-        'saleDate',
-        'status',
-        'userId',
-        'sellerId',
-      ]);
+  
+    describe('List a specific order using the id param', () => {
+      before(async () => {
+        sinon.stub(User, 'findOne').resolves(sellerDbResponse);
+        sinon.stub(Sale, 'findOne').resolves(sellerOrderById);
+      });
+      after(() => {
+        (User.findOne).restore();
+        (Sale.findOne).restore();
+      });
+  
+      it('Should return http status 200 and an object', async () => {
+        res = await chai.request(app).get('/seller/orders/2')
+          .set({ authorization: token });
+        expect(res.status).to.be.equal(200);
+        expect(res.body).to.be.an('object').to.have.own.property('status');
+      });
     });
   });
 
-  describe('List a specific order using the id param', () => {
-    before(async () => {
-      sinon.stub(User, 'findOne').resolves(sellerDbResponse);
-      sinon.stub(Sale, 'findOne').resolves(sellerOrderById);
-    });
-    after(() => {
-      (User.findOne).restore();
-      (Sale.findOne).restore();
-    });
-
-    it('Should return http status 200 and an object', async () => {
-      res = await chai.request(app).get('/seller/orders/2')
-        .set({ authorization: token });
-      expect(res.status).to.be.equal(200);
-      expect(res.body).to.be.an('object').to.have.own.property('status');
-    });
-  });
-
-  describe('Token with role equal customer try to list all seller orders', () => {
-    before(async () => {
-      sinon.stub(User, 'findOne').resolves(userDbResponse);
-      sinon.stub(Sale, 'findAll').resolves(orders);
-
+  describe('with customer token', () => {
+    beforeEach(async () => {
       const { body } = await chai.request(app).post('/login')
         .send(validUser);
       token = body.token;
     });
 
-    after(() => {
-      (User.findOne).restore();
-      (Sale.findAll).restore();
+    describe('try to list all seller orders', () => {
+      before(async () => {
+        sinon.stub(User, 'findOne').resolves(userDbResponse);
+        sinon.stub(Sale, 'findAll').resolves(orders);
+      });
+  
+      after(() => {
+        (User.findOne).restore();
+        (Sale.findAll).restore();
+      });
+  
+      it('Should return http status 403', async () => {
+        res = await chai.request(app).get('/seller/orders').set({ authorization: token });
+        expect(res.status).to.be.equal(403);
+        expect(res.body).to.be.an('object').to.have.own.property('message');
+        expect(res.body.message).to.be.equal('Access denied');
+      });
     });
-
-    it('Should return http status 403', async () => {
-      res = await chai.request(app).get('/seller/orders').set({ authorization: token });
-      expect(res.status).to.be.equal(403);
-      expect(res.body).to.be.an('object').to.have.own.property('message');
-      expect(res.body.message).to.be.equal('Access denied');
-    });
-  });
-
-  describe('Token with role equal customer try to list a specifc seller order', () => {
-    before(async () => {
-      sinon.stub(User, 'findOne').resolves(userDbResponse);
-      sinon.stub(Sale, 'findAll').resolves(orders);
-
-      const { body } = await chai.request(app).post('/login')
-        .send(validUser);
-      token = body.token;
-    });
-
-    after(() => {
-      (User.findOne).restore();
-      (Sale.findAll).restore();
-    });
-
-    it('Should return http status 403', async () => {
-      res = await chai.request(app).get('/seller/orders/2').set({ authorization: token });
-      expect(res.status).to.be.equal(403);
-      expect(res.body).to.be.an('object').to.have.own.property('message');
-      expect(res.body.message).to.be.equal('Access denied');
+  
+    describe('try to list a specifc seller order', () => {
+      before(async () => {
+        sinon.stub(User, 'findOne').resolves(userDbResponse);
+        sinon.stub(Sale, 'findAll').resolves(orders);
+      });
+  
+      after(() => {
+        (User.findOne).restore();
+        (Sale.findAll).restore();
+      });
+  
+      it('Should return http status 403', async () => {
+        res = await chai.request(app).get('/seller/orders/2').set({ authorization: token });
+        expect(res.status).to.be.equal(403);
+        expect(res.body).to.be.an('object').to.have.own.property('message');
+        expect(res.body.message).to.be.equal('Access denied');
+      });
     });
   });
 });
