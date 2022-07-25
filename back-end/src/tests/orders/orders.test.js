@@ -96,10 +96,15 @@ describe('Test GET /customer/orders endpoint', () => {
 
 describe('Test GET /seller/orders endpoint', () => {
   let res;
+  let token;
   describe('List all orders from a seller', () => {
     before(async () => {
       sinon.stub(User, 'findOne').resolves(sellerDbResponse);
       sinon.stub(Sale, 'findAll').resolves(orders);
+
+      const { body } = await chai.request(app).post('/login')
+        .send(validSeller);
+      token = body.token;
     });
 
     after(() => {
@@ -109,7 +114,7 @@ describe('Test GET /seller/orders endpoint', () => {
 
     it('Should return http status 200 and an array', async () => {
       res = await chai.request(app).get('/seller/orders')
-        .set({ authorization: sellerToken });
+        .set({ authorization: token });
       expect(res.status).to.be.equal(200);
       expect(res.body).to.be.an('array').to.have.length(3);
       expect(res.body[0]).to.all.keys([
@@ -137,7 +142,7 @@ describe('Test GET /seller/orders endpoint', () => {
 
     it('Should return http status 200 and an object', async () => {
       res = await chai.request(app).get('/seller/orders/2')
-        .set({ authorization: sellerToken });
+        .set({ authorization: token });
       expect(res.status).to.be.equal(200);
       expect(res.body).to.be.an('object').to.have.own.property('status');
     });
@@ -147,6 +152,10 @@ describe('Test GET /seller/orders endpoint', () => {
     before(async () => {
       sinon.stub(User, 'findOne').resolves(userDbResponse);
       sinon.stub(Sale, 'findAll').resolves(orders);
+
+      const { body } = await chai.request(app).post('/login')
+        .send(validUser);
+      token = body.token;
     });
 
     after(() => {
@@ -155,7 +164,7 @@ describe('Test GET /seller/orders endpoint', () => {
     });
 
     it('Should return http status 403', async () => {
-      res = await chai.request(app).get('/seller/orders').set({ authorization: sellerToken });
+      res = await chai.request(app).get('/seller/orders').set({ authorization: token });
       expect(res.status).to.be.equal(403);
       expect(res.body).to.be.an('object').to.have.own.property('message');
       expect(res.body.message).to.be.equal('Access denied');
@@ -166,6 +175,10 @@ describe('Test GET /seller/orders endpoint', () => {
     before(async () => {
       sinon.stub(User, 'findOne').resolves(userDbResponse);
       sinon.stub(Sale, 'findAll').resolves(orders);
+
+      const { body } = await chai.request(app).post('/login')
+        .send(validUser);
+      token = body.token;
     });
 
     after(() => {
@@ -174,7 +187,7 @@ describe('Test GET /seller/orders endpoint', () => {
     });
 
     it('Should return http status 403', async () => {
-      res = await chai.request(app).get('/seller/orders/2').set({ authorization: sellerToken });
+      res = await chai.request(app).get('/seller/orders/2').set({ authorization: token });
       expect(res.status).to.be.equal(403);
       expect(res.body).to.be.an('object').to.have.own.property('message');
       expect(res.body.message).to.be.equal('Access denied');
@@ -184,6 +197,7 @@ describe('Test GET /seller/orders endpoint', () => {
 
 describe('Test PATCH order routes', () => {
   let res;
+  let token;
   describe('Test seller/orders/start/:id', () => {
     it('Send an invalid token', async () => {
       res = await chai.request(app).patch('/seller/orders/start/2');
@@ -198,8 +212,11 @@ describe('Test PATCH order routes', () => {
     after(() => { (Sale.update).restore() });
 
     it('Should return http status 204', async () => {
+      const { body } = await chai.request(app).post('/login')
+        .send(validSeller);
+      token = body.token;
       res = await chai.request(app).patch('/seller/orders/start/2')
-        .set({ authorization: sellerToken });
+        .set({ authorization: token });
       expect(res.status).to.be.equal(204);
     });
   });
@@ -209,8 +226,11 @@ describe('Test PATCH order routes', () => {
     after(() => { (Sale.update).restore() });
 
     it('Should return http status 404', async () => {
+      const { body } = await chai.request(app).post('/login')
+        .send(validSeller);
+      token = body.token;
       res = await chai.request(app).patch('/seller/orders/start/2')
-        .set({ authorization: sellerToken });
+        .set({ authorization: token });
       expect(res.status).to.be.equal(404);
       expect(res.body).to.be.an('object').to.have.own.property('message');
       expect(res.body.message).to.be.equal('Order not found');
@@ -225,8 +245,11 @@ describe('Test PATCH order routes', () => {
     after(() => { (Sale.update).restore(); });
 
     it('Should return http status 500', async () => {
+      const { body } = await chai.request(app).post('/login')
+        .send(validSeller);
+      token = body.token;
       res = await chai.request(app).patch('/seller/orders/start/2')
-        .set({ authorization: sellerToken });
+        .set({ authorization: token });
       expect(res.status).to.be.equal(500);
       expect(res.body).to.have.own.property('message')
     });
@@ -237,8 +260,11 @@ describe('Test PATCH order routes', () => {
     after(() => { (Sale.update).restore() });
 
     it('Should return http status 204', async () => {
+      const { body } = await chai.request(app).post('/login')
+        .send(validSeller);
+      token = body.token;
       res = await chai.request(app).patch('/seller/orders/leave/2')
-        .set({ authorization: sellerToken });
+        .set({ authorization: token });
       expect(res.status).to.be.equal(204);
     });
   });
@@ -248,8 +274,11 @@ describe('Test PATCH order routes', () => {
     after(() => { (Sale.update).restore() });
 
     it('Should return http status 404', async () => {
+      const { body } = await chai.request(app).post('/login')
+        .send(validSeller);
+      token = body.token;
       res = await chai.request(app).patch('/seller/orders/leave/2')
-        .set({ authorization: sellerToken });
+        .set({ authorization: token });
       expect(res.status).to.be.equal(404);
       expect(res.body).to.be.an('object').to.have.own.property('message');
       expect(res.body.message).to.be.equal('Order not found');
@@ -264,8 +293,11 @@ describe('Test PATCH order routes', () => {
     after(() => { (Sale.update).restore(); });
 
     it('Should return http status 500', async () => {
+      const { body } = await chai.request(app).post('/login')
+        .send(validSeller);
+      token = body.token;
       res = await chai.request(app).patch('/seller/orders/leave/2')
-        .set({ authorization: sellerToken });
+        .set({ authorization: token });
       expect(res.status).to.be.equal(500);
       expect(res.body).to.have.own.property('message')
     });
@@ -276,8 +308,11 @@ describe('Test PATCH order routes', () => {
     after(() => { (Sale.update).restore() });
 
     it('Should return http status 204', async () => {
+      const { body } = await chai.request(app).post('/login')
+        .send(validSeller);
+      token = body.token;
       res = await chai.request(app).patch('/seller/orders/delivered/2')
-        .set({ authorization: sellerToken });
+        .set({ authorization: token });
       expect(res.status).to.be.equal(204);
     });
   });
@@ -287,8 +322,11 @@ describe('Test PATCH order routes', () => {
     after(() => { (Sale.update).restore() });
 
     it('Should return http status 404', async () => {
+      const { body } = await chai.request(app).post('/login')
+        .send(validSeller);
+      token = body.token;
       res = await chai.request(app).patch('/seller/orders/delivered/2')
-        .set({ authorization: sellerToken });
+        .set({ authorization: token });
       expect(res.status).to.be.equal(404);
       expect(res.body).to.be.an('object').to.have.own.property('message');
       expect(res.body.message).to.be.equal('Order not found');
@@ -303,8 +341,11 @@ describe('Test PATCH order routes', () => {
     after(() => { (Sale.update).restore(); });
 
     it('Should return http status 500', async () => {
+      const { body } = await chai.request(app).post('/login')
+        .send(validSeller);
+      token = body.token;
       res = await chai.request(app).patch('/seller/orders/delivered/2')
-        .set({ authorization: sellerToken });
+        .set({ authorization: token });
       expect(res.status).to.be.equal(500);
       expect(res.body).to.have.own.property('message')
     });
