@@ -110,16 +110,19 @@ describe('Test GET /seller/orders endpoint', () => {
       const { body } = await chai.request(app).post('/login')
         .send(validSeller);
       token = body.token;
+      sinon.stub(User, 'findOne').resolves(sellerDbResponse);
+    });
+
+    afterEach(() => {
+      User.findOne.restore();
     });
   
     describe('List all orders from a seller', () => {
       before(async () => {
-        sinon.stub(User, 'findOne').resolves(sellerDbResponse);
         sinon.stub(Sale, 'findAll').resolves(orders);
       });
   
       after(() => {
-        (User.findOne).restore();
         (Sale.findAll).restore();
       });
   
@@ -143,11 +146,9 @@ describe('Test GET /seller/orders endpoint', () => {
   
     describe('List a specific order using the id param', () => {
       before(async () => {
-        sinon.stub(User, 'findOne').resolves(sellerDbResponse);
         sinon.stub(Sale, 'findOne').resolves(sellerOrderById);
       });
       after(() => {
-        (User.findOne).restore();
         (Sale.findOne).restore();
       });
   
@@ -165,19 +166,14 @@ describe('Test GET /seller/orders endpoint', () => {
       const { body } = await chai.request(app).post('/login')
         .send(validUser);
       token = body.token;
+      sinon.stub(User, 'findOne').resolves(userDbResponse);
+    });
+
+    afterEach(() => {
+      User.findOne.restore();
     });
 
     describe('try to list all seller orders', () => {
-      before(async () => {
-        sinon.stub(User, 'findOne').resolves(userDbResponse);
-        sinon.stub(Sale, 'findAll').resolves(orders);
-      });
-  
-      after(() => {
-        (User.findOne).restore();
-        (Sale.findAll).restore();
-      });
-  
       it('Should return http status 403', async () => {
         res = await chai.request(app).get('/seller/orders').set({ authorization: token });
         expect(res.status).to.be.equal(403);
@@ -187,16 +183,6 @@ describe('Test GET /seller/orders endpoint', () => {
     });
   
     describe('try to list a specifc seller order', () => {
-      before(async () => {
-        sinon.stub(User, 'findOne').resolves(userDbResponse);
-        sinon.stub(Sale, 'findAll').resolves(orders);
-      });
-  
-      after(() => {
-        (User.findOne).restore();
-        (Sale.findAll).restore();
-      });
-  
       it('Should return http status 403', async () => {
         res = await chai.request(app).get('/seller/orders/2').set({ authorization: token });
         expect(res.status).to.be.equal(403);
