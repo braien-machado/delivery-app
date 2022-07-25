@@ -71,6 +71,7 @@ const getSellerSales = async (email) => {
 const getSellerSalesById = async (id, email) => {
   const user = await getUserByParam(email, 'email');
   if (!user) return { message: USER_NOT_FOUND };
+  if (user.role !== 'seller') throw new Error();
   const sale = await Sale.findOne({ where: { sellerId: user.id, id },
     include: [{
       model: Product,
