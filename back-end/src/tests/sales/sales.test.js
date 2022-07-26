@@ -25,7 +25,6 @@ describe('Test POST /sales endpoint', () => {
     const { body } = await chai.request(app).post('/login')
       .send(validUser);
     token = body.token;
-    console.log(body);
   });
 
   describe('Create sale successfully', () => {
