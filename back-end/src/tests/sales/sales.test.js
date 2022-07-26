@@ -25,6 +25,7 @@ describe('Test POST /sales endpoint', () => {
     const { body } = await chai.request(app).post('/login')
       .send(validUser);
     token = body.token;
+    console.log(body);
   });
 
   describe('Create sale successfully', () => {
@@ -59,7 +60,8 @@ describe('Test POST /sales endpoint', () => {
 
     describe('Send a valid token however user does not exist', () => {
       before(async () => {
-        sinon.stub(User, 'findOne').resolves(null);
+        sinon.stub(User, 'findOne').onFirstCall().resolves(userDbResponse)
+          .onSecondCall().resolves(null);
       });
 
       after(() => (User.findOne).restore());
