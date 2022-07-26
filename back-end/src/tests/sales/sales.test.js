@@ -7,12 +7,11 @@ const app = require('../../api/app');
 const {
   createdSale,
   validSale,
-  token,
   saleWithoutTotalPrice,
   saleWithoutProducts,
   saleWithouProductsProperties,
 } = require('./mocks/salesMock');
-const { userDbResponse } = require('../users/mocks/loginMocks');
+const { userDbResponse, validUser } = require('../users/mocks/loginMocks');
 
 chai.use(chaiHttp);
 const { expect } = chai;
@@ -20,6 +19,14 @@ const SALES_ROUTE = '/sales';
 
 describe('Test POST /sales endpoint', () => {
   let res;
+  let token;
+
+  beforeEach(async () => {
+    const { body } = await chai.request(app).post('/login')
+      .send(validUser);
+    token = body.token;
+  });
+
   describe('Create sale successfully', () => {
     before(async () => {
       sinon.stub(User, 'findOne').resolves(userDbResponse);
@@ -52,7 +59,8 @@ describe('Test POST /sales endpoint', () => {
 
     describe('Send a valid token however user does not exist', () => {
       before(async () => {
-        sinon.stub(User, 'findOne').resolves(null);
+        sinon.stub(User, 'findOne').onFirstCall().resolves(userDbResponse)
+          .onSecondCall().resolves(null);
       });
 
       after(() => (User.findOne).restore());

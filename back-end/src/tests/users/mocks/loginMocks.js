@@ -3,6 +3,11 @@ const validUser = {
 	password: '$#zebirita#$',
 };
 
+const validAdmin = {
+	email: 'adm@deliveryapp.com',
+	password: '--adm2@21!!--',
+};
+
 const validSeller = {
   email: 'fulana@deliveryapp.com',
   password: 'fulana@123',
@@ -11,6 +16,14 @@ const validSeller = {
 const inValidUser = {
   email: 'zebirita@email.com',
 	password: '$#zebirita#$$',
+};
+
+const adminDbResponse = {
+  id: 3,
+  name: 'Delivery App Admin',
+  email: 'adm@deliveryapp.com',
+  password: 'a4c86edecc5aee06eff8fdeda69e0d04',
+  role: 'administrator',
 };
 
 const userDbResponse = {
@@ -39,6 +52,8 @@ const sellerDbResponse = {
 
 module.exports = {
   validUser,
+  validAdmin,
+  adminDbResponse,
   validSeller,
   userDbResponse,
   inValidUser,
