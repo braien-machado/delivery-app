@@ -3,6 +3,7 @@ jest.mock('../utils/api/service');
 import React from 'react';
 import { screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import '@testing-library/jest-dom';
 
 import Login from '../pages/Login';
 import renderWithRouter from './renderWithRouter';
@@ -16,15 +17,13 @@ describe('Test Login page without navigation', () => {
   it('Should have the right screen elements', () => {
     renderWithRouter(<Login />);
   
-    const logo = screen.getByRole('img', { name: /logo app delivery/i });
-    const title = screen.getByRole('heading', { name: /delivery app/i, level: 1 });
-    const emailInput = screen.getByRole('textbox', { name: /login/i });
+    const title = screen.getByRole('heading', {  name: /até as 17h delivery app/i});
+    const emailInput = screen.getByRole('textbox', {  name: /email/i});
     const passwordInput = screen.getByLabelText(/senha/i);
     const loginButton = screen.getByRole('button', { name: /login/i });
   
     const registerButton = screen.getByRole('button', { name: /não tenho conta/i });
 
-    expect(logo).toBeInTheDocument();
     expect(title).toBeInTheDocument();
     expect(emailInput).toBeInTheDocument();
     expect(passwordInput).toBeInTheDocument();
@@ -36,7 +35,7 @@ describe('Test Login page without navigation', () => {
   it('Should enable login button', () => {
     renderWithRouter(<Login />);
   
-    const emailInput = screen.getByRole('textbox', { name: /login/i });
+    const emailInput = screen.getByRole('textbox', {  name: /email/i});
     const passwordInput = screen.getByLabelText(/senha/i);
     const loginButton = screen.getByRole('button', { name: /login/i });
 
@@ -51,7 +50,7 @@ describe('Test Login page without navigation', () => {
   it('Should not enable login button with invalid email format', () => {
     renderWithRouter(<Login />);
   
-    const emailInput = screen.getByRole('textbox', { name: /login/i });
+    const emailInput = screen.getByRole('textbox', {  name: /email/i});
     const passwordInput = screen.getByLabelText(/senha/i);
     const loginButton = screen.getByRole('button', { name: /login/i });
 
@@ -66,7 +65,7 @@ describe('Test Login page without navigation', () => {
   it('Should not enable login button with short password', () => {
     renderWithRouter(<Login />);
   
-    const emailInput = screen.getByRole('textbox', { name: /login/i });
+    const emailInput = screen.getByRole('textbox', {  name: /email/i});
     const passwordInput = screen.getByLabelText(/senha/i);
     const loginButton = screen.getByRole('button', { name: /login/i });
 
@@ -135,7 +134,7 @@ describe('Test login page with navigation', () => {
         history = renderWithRouter(<Login />).history;
         history.push = jest.fn();
   
-        emailInput = screen.getByRole('textbox', { name: /login/i });
+        emailInput = screen.getByRole('textbox', {  name: /email/i});
         passwordInput = screen.getByLabelText(/senha/i);
         loginButton = screen.getByRole('button', { name: /login/i });
     
@@ -176,7 +175,7 @@ describe('Test login page with navigation', () => {
         const { history } = renderWithRouter(<Login />);
         history.push = jest.fn();
   
-        const emailInput = screen.getByRole('textbox', { name: /login/i });
+        const emailInput = screen.getByRole('textbox', {  name: /email/i});
         const passwordInput = screen.getByLabelText(/senha/i);
         const loginButton = screen.getByRole('button', { name: /login/i });
     
@@ -203,7 +202,7 @@ describe('Test login page with navigation', () => {
         const { history } = renderWithRouter(<Login />);
         history.push = jest.fn();
   
-        const emailInput = screen.getByRole('textbox', { name: /login/i });
+        const emailInput = screen.getByRole('textbox', {  name: /email/i});
         const passwordInput = screen.getByLabelText(/senha/i);
         const loginButton = screen.getByRole('button', { name: /login/i });
     
@@ -226,23 +225,18 @@ describe('Test login page with navigation', () => {
         service.login.mockImplementation(() => Promise.resolve(undefined));
         renderWithRouter(<Login />);
       
-        const emailInput = screen.getByRole('textbox', { name: /login/i });
+        const emailInput = screen.getByRole('textbox', {  name: /email/i});
         const passwordInput = screen.getByLabelText(/senha/i);
         const loginButton = screen.getByRole('button', { name: /login/i });
-        let errorElement = screen.queryByText(/email ou senha invalidos!/i);
     
         userEvent.type(emailInput, 'wrong@email.com');
         userEvent.type(passwordInput, 'wrong_password');
     
-        expect(errorElement).not.toBeInTheDocument();
-    
         await act(async () => {
           userEvent.click(loginButton);
         });
-    
-        errorElement = screen.queryByText(/email ou senha invalidos!/i);
-    
-        expect(errorElement).toBeInTheDocument();
+
+        expect(await screen.findByText(/email ou senha inválidos!/i)).toBeInTheDocument();
       });
     });
   });

@@ -1,8 +1,9 @@
 jest.mock('../utils/api/service');
 
 import React from 'react';
-import { screen, act } from '@testing-library/react';
+import { screen, act, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import '@testing-library/jest-dom';
 
 import AdminManage from '../pages/AdminManage';
 import renderWithRouter from './renderWithRouter';
@@ -88,8 +89,8 @@ describe('Admin page', () => {
       const title = screen.getByRole('heading', {  name: /cadastrar novo usuário/i});
       const nameInput = screen.getByRole('textbox', { name: /nome/i });
       const emailInput = screen.getByRole('textbox', { name: /email/i });
-      const passwordInput = screen.getByRole('textbox', {  name: /senha:/i});
-      const selectRole = screen.getByRole('combobox', {  name: /tipo:/i});
+      const passwordInput = screen.getByRole('textbox', {  name: /senha/i});
+      const selectRole = screen.getByRole('combobox', {  name: /tipo/i});
       const registerButton = screen.getByRole('button', { name: /cadastrar/i });
 
       expect(title).toBeInTheDocument();
@@ -105,8 +106,8 @@ describe('Admin page', () => {
     it('should enable the register button with valid inputs', () => {
       const nameInput = screen.getByRole('textbox', { name: /nome/i });
       const emailInput = screen.getByRole('textbox', { name: /email/i });
-      const passwordInput = screen.getByRole('textbox', {  name: /senha:/i});
-      const selectRole = screen.getByRole('combobox', {  name: /tipo:/i});
+      const passwordInput = screen.getByRole('textbox', {  name: /senha/i});
+      const selectRole = screen.getByRole('combobox', {  name: /tipo/i});
       const registerButton = screen.getByRole('button', { name: /cadastrar/i });
   
       expect(registerButton).toBeDisabled();
@@ -127,7 +128,7 @@ describe('Admin page', () => {
     it('should not enable the register button with short name', () => {
       const nameInput = screen.getByRole('textbox', { name: /nome/i });
       const emailInput = screen.getByRole('textbox', { name: /email/i });
-      const passwordInput = screen.getByRole('textbox', {  name: /senha:/i});
+      const passwordInput = screen.getByRole('textbox', {  name: /senha/i});
       const registerButton = screen.getByRole('button', { name: /cadastrar/i });
   
       expect(registerButton).toBeDisabled();
@@ -142,7 +143,7 @@ describe('Admin page', () => {
     it('should not enable the register button with invalid email format', () => {
       const nameInput = screen.getByRole('textbox', { name: /nome/i });
       const emailInput = screen.getByRole('textbox', { name: /email/i });
-      const passwordInput = screen.getByRole('textbox', {  name: /senha:/i});
+      const passwordInput = screen.getByRole('textbox', {  name: /senha/i});
       const registerButton = screen.getByRole('button', { name: /cadastrar/i });
 
       expect(registerButton).toBeDisabled();
@@ -157,7 +158,7 @@ describe('Admin page', () => {
     it('should not enable the register button with short password', () => {
       const nameInput = screen.getByRole('textbox', { name: /nome/i });
       const emailInput = screen.getByRole('textbox', { name: /email/i });
-      const passwordInput = screen.getByRole('textbox', {  name: /senha:/i});
+      const passwordInput = screen.getByRole('textbox', {  name: /senha/i});
       const registerButton = screen.getByRole('button', { name: /cadastrar/i });
 
       expect(registerButton).toBeDisabled();
@@ -295,7 +296,7 @@ describe('Admin page', () => {
 
       const nameInput = screen.getByRole('textbox', { name: /nome/i });
       const emailInput = screen.getByRole('textbox', { name: /email/i });
-      const passwordInput = screen.getByRole('textbox', {  name: /senha:/i});
+      const passwordInput = screen.getByRole('textbox', {  name: /senha/i});
 
       userEvent.type(nameInput, userMock.adminManage[0].name);
       userEvent.type(emailInput, userMock.adminManage[0].email);
@@ -344,19 +345,13 @@ describe('Admin page', () => {
     });
 
     it('should show error message', async () => {
-      let errorElement = screen.queryByText(/usuário já cadastrado!/i);
-
-      expect(errorElement).not.toBeInTheDocument();
-
       const registerButton = screen.getByRole('button', { name: /cadastrar/i });
 
       await act(async () => {
         userEvent.click(registerButton);
       });
 
-      errorElement = screen.queryByText(/usuário já cadastrado!/i);
-
-      expect(errorElement).toBeInTheDocument();
+      expect(await screen.findByText(/usuário já cadastrado/i)).toBeInTheDocument();
     });
   });
 
@@ -377,7 +372,7 @@ describe('Admin page', () => {
     it('should call service.adminRegister', async () => {
       const nameInput = screen.getByRole('textbox', { name: /nome/i });
       const emailInput = screen.getByRole('textbox', { name: /email/i });
-      const passwordInput = screen.getByRole('textbox', {  name: /senha:/i});
+      const passwordInput = screen.getByRole('textbox', {  name: /senha/i});
       const registerButton = screen.getByRole('button', { name: /cadastrar/i });
   
       userEvent.type(nameInput, USER_NAME);
@@ -396,7 +391,7 @@ describe('Admin page', () => {
     it('should call service.adminRegister with user name, email, password, role and admin token', async () => {
       const nameInput = screen.getByRole('textbox', { name: /nome/i });
       const emailInput = screen.getByRole('textbox', { name: /email/i });
-      const passwordInput = screen.getByRole('textbox', {  name: /senha:/i});
+      const passwordInput = screen.getByRole('textbox', {  name: /senha/i});
       const registerButton = screen.getByRole('button', { name: /cadastrar/i });
   
       userEvent.type(nameInput, USER_NAME);
@@ -420,7 +415,7 @@ describe('Admin page', () => {
 
       const nameInput = screen.getByRole('textbox', { name: /nome/i });
       const emailInput = screen.getByRole('textbox', { name: /email/i });
-      const passwordInput = screen.getByRole('textbox', {  name: /senha:/i});
+      const passwordInput = screen.getByRole('textbox', {  name: /senha/i});
       const registerButton = screen.getByRole('button', { name: /cadastrar/i });
   
       userEvent.type(nameInput, USER_NAME);

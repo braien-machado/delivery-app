@@ -10,6 +10,7 @@ import * as S from '../styles/register';
 import ToastMessage from '../utils/helpers/toastifyMessage';
 
 import 'react-toastify/dist/ReactToastify.css';
+import { useEffect } from 'react';
 
 const TOASTIFY_POSITION = 'top-center';
 
@@ -18,6 +19,7 @@ export default function Register() {
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [isDisabled, setIsDisabled] = useState(true);
   const [reveal, setReveal] = useState(false);
 
   const navigate = useNavigate();
@@ -28,6 +30,23 @@ export default function Register() {
     setPassword('');
     setConfirmPassword('');
   };
+
+  useEffect(() => {
+    const validateInputs = () => {
+      const regex = /^[a-z0-9._]+@[a-z0-9]+\.[a-z]+\.?[a-z]+$/;
+      const minPasswordLength = 8;
+      const minNameLength = 6;
+
+      setIsDisabled(
+        password.length < minPasswordLength
+        || confirmPassword.length < minPasswordLength
+        || !regex.test(email)
+        || name.length < minNameLength,
+      );
+    };
+
+    validateInputs();
+  });
 
   const validatePassword = (pass, confirm) => {
     const PASSWORD_BODY = /(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[$*&@#])/;
@@ -137,6 +156,7 @@ export default function Register() {
           data-testid="common_register__button-register"
           type="button"
           onClick={ sendRegisterInfo }
+          disabled={ isDisabled }
         >
           Cadastrar
         </S.Button>

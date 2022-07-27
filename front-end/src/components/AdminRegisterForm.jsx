@@ -32,6 +32,7 @@ export default function AdminRegisterForm({ update }) {
     const t = localStorageUser().token;
     const user = { name, email, password, role };
     const response = await adminRegister(user, t);
+
     if (response) {
       return toast
         .error('Usuário já cadastrado', { theme: 'dark', position: 'top-center' });

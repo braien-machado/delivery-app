@@ -3,6 +3,7 @@ jest.mock('../utils/api/service');
 import React from 'react';
 import { screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import '@testing-library/jest-dom';
 
 import Register from '../pages/Register';
 import renderWithRouter from './renderWithRouter';
@@ -18,12 +19,14 @@ describe('Test Register page without navigation', () => {
   it('Should have the right screen elements', () => {
     const nameInput = screen.getByRole('textbox', { name: /nome/i });
     const emailInput = screen.getByRole('textbox', { name: /email/i });
-    const passwordInput = screen.getByLabelText(/senha/i);
+    const passwordInput = screen.getByLabelText(/^senha$/i);
+    const confirmPasswordInput = screen.getByLabelText(/confirmar senha/i);
     const registerButton = screen.getByRole('button', { name: /cadastrar/i });
 
     expect(nameInput).toBeInTheDocument();
     expect(emailInput).toBeInTheDocument();
     expect(passwordInput).toBeInTheDocument();
+    expect(confirmPasswordInput).toBeInTheDocument();
     expect(registerButton).toBeInTheDocument();
     expect(registerButton).toBeDisabled();
   });
@@ -31,7 +34,8 @@ describe('Test Register page without navigation', () => {
   it('should enable the register button with valid inputs', () => {
     const nameInput = screen.getByRole('textbox', { name: /nome/i });
     const emailInput = screen.getByRole('textbox', { name: /email/i });
-    const passwordInput = screen.getByLabelText(/senha/i);
+    const passwordInput = screen.getByLabelText(/^senha$/i);
+    const confirmPasswordInput = screen.getByLabelText(/confirmar senha/i);
     const registerButton = screen.getByRole('button', { name: /cadastrar/i });
 
     expect(registerButton).toBeDisabled();
@@ -39,6 +43,7 @@ describe('Test Register page without navigation', () => {
     userEvent.type(nameInput, USER_NAME);
     userEvent.type(emailInput, USER_EMAIL);
     userEvent.type(passwordInput, USER_PASSWORD);
+    userEvent.type(confirmPasswordInput, USER_PASSWORD);
 
     expect(registerButton).not.toBeDisabled();
   });
@@ -46,14 +51,16 @@ describe('Test Register page without navigation', () => {
   it('Should not enable the register button with short name', () => {
     const nameInput = screen.getByRole('textbox', { name: /nome/i });
     const emailInput = screen.getByRole('textbox', { name: /email/i });
-    const passwordInput = screen.getByLabelText(/senha/i);
+    const passwordInput = screen.getByLabelText(/^senha$/i);
+    const confirmPasswordInput = screen.getByLabelText(/confirmar senha/i);
     const registerButton = screen.getByRole('button', { name: /cadastrar/i });
 
     expect(registerButton).toBeDisabled();
 
-    userEvent.type(nameInput, 'tooshort');
+    userEvent.type(nameInput, 'short');
     userEvent.type(emailInput, USER_EMAIL);
     userEvent.type(passwordInput, USER_PASSWORD);
+    userEvent.type(confirmPasswordInput, USER_PASSWORD);
 
     expect(registerButton).toBeDisabled();
   });
@@ -61,7 +68,8 @@ describe('Test Register page without navigation', () => {
   it('Should not enable the register button with invalid email format', () => {
     const nameInput = screen.getByRole('textbox', { name: /nome/i });
     const emailInput = screen.getByRole('textbox', { name: /email/i });
-    const passwordInput = screen.getByLabelText(/senha/i);
+    const passwordInput = screen.getByLabelText(/^senha$/i);
+    const confirmPasswordInput = screen.getByLabelText(/confirmar senha/i);
     const registerButton = screen.getByRole('button', { name: /cadastrar/i });
 
     expect(registerButton).toBeDisabled();
@@ -69,6 +77,7 @@ describe('Test Register page without navigation', () => {
     userEvent.type(nameInput, USER_NAME);
     userEvent.type(emailInput, 'invalid_format.com');
     userEvent.type(passwordInput, USER_PASSWORD);
+    userEvent.type(confirmPasswordInput, USER_PASSWORD);
 
     expect(registerButton).toBeDisabled();
   });
@@ -76,7 +85,8 @@ describe('Test Register page without navigation', () => {
   it('Should not enable the register button with short password', () => {
     const nameInput = screen.getByRole('textbox', { name: /nome/i });
     const emailInput = screen.getByRole('textbox', { name: /email/i });
-    const passwordInput = screen.getByLabelText(/senha/i);
+    const passwordInput = screen.getByLabelText(/^senha$/i);
+    const confirmPasswordInput = screen.getByLabelText(/confirmar senha/i);
     const registerButton = screen.getByRole('button', { name: /cadastrar/i });
 
     expect(registerButton).toBeDisabled();
@@ -84,6 +94,7 @@ describe('Test Register page without navigation', () => {
     userEvent.type(nameInput, USER_NAME);
     userEvent.type(emailInput, USER_EMAIL);
     userEvent.type(passwordInput, 'short');
+    userEvent.type(confirmPasswordInput, 'short');
 
     expect(registerButton).toBeDisabled();
   });
@@ -101,11 +112,13 @@ describe('Test Register page with navigation', () => {
 
       const nameInput = screen.getByRole('textbox', { name: /nome/i });
       const emailInput = screen.getByRole('textbox', { name: /email/i });
-      const passwordInput = screen.getByLabelText(/senha/i);
+      const passwordInput = screen.getByLabelText(/^senha$/i);
+      const confirmPasswordInput = screen.getByLabelText(/confirmar senha/i);
       const registerButton = screen.getByRole('button', { name: /cadastrar/i });
   
       userEvent.type(emailInput, USER_EMAIL);
       userEvent.type(passwordInput, USER_PASSWORD);
+      userEvent.type(confirmPasswordInput, USER_PASSWORD);
       userEvent.type(nameInput, USER_NAME); 
       userEvent.click(registerButton);
     });
@@ -140,7 +153,7 @@ describe('registering already registered user', () => {
   
     const nameInput = screen.getByRole('textbox', { name: /nome/i });
     const emailInput = screen.getByRole('textbox', { name: /email/i });
-    const passwordInput = screen.getByLabelText(/senha/i);
+    const passwordInput = screen.getByLabelText(/^senha$/i);
     const registerButton = screen.getByRole('button', { name: /cadastrar/i });
     let errorElement = screen.queryByText(/usuário já cadastrado!/i);
   

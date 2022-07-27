@@ -9,10 +9,9 @@ export const Container = styled.header`
   justify-content: space-around;
 `;
 
-export const Title = styled.span`
-  @media(max-width: 400px) {
-    font-size: 20px;
-  }
+export const Title = styled.h1`
+  font-size: 20px;
+  font-weight: normal;
 
   @media(min-width: 401px) and (max-width: 440px) {
     font-size: 22px;
@@ -22,7 +21,7 @@ export const Title = styled.span`
     font-size: 25px;
   }
 
-  @media(min-width: 541px) and (max-width: 840px) {
+  @media(min-width: 541px) {
     font-size: 28px;
   }
 `;
