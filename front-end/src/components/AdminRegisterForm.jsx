@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { toast } from 'react-toastify';
+import { toast, ToastContainer } from 'react-toastify';
 import { adminRegister } from '../utils/api/service';
 import { localStorageUser } from '../utils/localStorage/localStorage';
 import * as S from '../styles/adminManage';
@@ -32,6 +32,7 @@ export default function AdminRegisterForm({ update }) {
     const t = localStorageUser().token;
     const user = { name, email, password, role };
     const response = await adminRegister(user, t);
+
     if (response) {
       return toast
         .error('Usuário já cadastrado', { theme: 'dark', position: 'top-center' });
@@ -46,6 +47,7 @@ export default function AdminRegisterForm({ update }) {
 
   return (
     <S.Container>
+      <ToastContainer />
       <S.Title>Cadastrar novo usuário</S.Title>
       <S.Form>
         <S.Label htmlFor="name-input">
