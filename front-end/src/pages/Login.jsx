@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
+import { toast, ToastContainer } from 'react-toastify';
 import { IoEyeOffOutline, IoEyeOutline } from 'react-icons/io5';
 
 import { login } from '../utils/api/service';
@@ -11,13 +11,26 @@ import {
 import * as S from '../styles/login';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import { useEffect } from 'react';
 
 export default function Login() {
   const [password, setPassword] = useState('');
   const [email, setEmail] = useState('');
   const [reveal, setReveal] = useState(false);
+  const [isDisabled, setIsDisabled] = useState(true);
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const validateInputs = () => {
+      const regex = /^[a-z0-9._]+@[a-z0-9]+\.[a-z]+\.?[a-z]+$/;
+      const minPasswordLength = 6;
+
+      setIsDisabled(password.length < minPasswordLength || !regex.test(email));
+    };
+
+    validateInputs();
+  }, [password, email]);
 
   const handleRole = (role) => {
     switch (role) {
@@ -47,6 +60,7 @@ export default function Login() {
     return (
       <>
         <Header />
+        <ToastContainer />
         <S.Container>
           <S.Form>
             <S.Label htmlFor="login-input">
@@ -82,6 +96,7 @@ export default function Login() {
             <S.LoginButton
               type="button"
               data-testid="common_login__button-login"
+              disabled={ isDisabled }
               onClick={ sendLoginInfo }
             >
               Login

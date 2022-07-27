@@ -3,7 +3,7 @@ jest.mock('../utils/api/service');
 import React from 'react';
 import { screen, act, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import '@testing-library/jest-dom'
+import '@testing-library/jest-dom';
 
 import AdminManage from '../pages/AdminManage';
 import renderWithRouter from './renderWithRouter';
