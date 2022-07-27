@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
-import { toast, ToastContainer } from 'react-toastify';
+import { toast } from 'react-toastify';
 import { IoEyeOffOutline, IoEyeOutline } from 'react-icons/io5';
 
 import { login } from '../utils/api/service';
@@ -60,7 +60,6 @@ export default function Login() {
     return (
       <>
         <Header />
-        <ToastContainer />
         <S.Container>
           <S.Form>
             <S.Label htmlFor="login-input">
